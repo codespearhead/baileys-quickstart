@@ -13,11 +13,9 @@ import makeWASocket, {
 import MAIN_LOGGER from "@adiwajshing/baileys/lib/Utils/logger";
 import { rmdir } from "fs";
 
+// Logger
 const logger = MAIN_LOGGER.child({});
-logger.level = "trace";
-
-const useStore = !process.argv.includes("--no-store");
-const doReplies = !process.argv.includes("--no-reply");
+logger.level = "info";
 
 // external map to store retry counts of messages when decryption/encryption fails
 // keep this out of the socket itself, so as to prevent a message decryption/encryption loop across socket restarts
@@ -25,6 +23,8 @@ const msgRetryCounterMap: MessageRetryMap = {};
 
 // the store maintains the data of the WA connection in memory
 // can be written out to a file & read from it
+const useStore = !process.argv.includes("--no-store");
+
 const store = useStore ? makeInMemoryStore({ logger }) : undefined;
 store?.readFromFile("./baileys_store_multi.json");
 // save every 10s
@@ -50,8 +50,7 @@ const startSock = async () => {
     },
     msgRetryCounterMap,
     generateHighQualityLinkPreview: true,
-    // ignore all broadcast messages -- to receive the same
-    // comment the line below out
+    // ignore all broadcast messages. TO receive them, comment out the line below
     shouldIgnoreJid: (jid) => isJidBroadcast(jid),
     // implement to handle retries
     getMessage: async (key) => {
@@ -59,7 +58,6 @@ const startSock = async () => {
         const msg = await store.loadMessage(key.remoteJid!, key.id!);
         return msg?.message || undefined;
       }
-
       // only if store is present
       return {
         conversation: "hello",
@@ -71,10 +69,10 @@ const startSock = async () => {
 
   const sendMessageWTyping = async (msg: AnyMessageContent, jid: string) => {
     await sock.presenceSubscribe(jid);
-    await delay(500);
+    await delay(500 + Math.floor(Math.random() * 401));
 
     await sock.sendPresenceUpdate("composing", jid);
-    await delay(2000);
+    await delay(2000 + Math.floor(Math.random() * 401));
 
     await sock.sendPresenceUpdate("paused", jid);
 
@@ -98,24 +96,22 @@ const startSock = async () => {
             DisconnectReason.loggedOut
           ) {
             console.log("Connection closed. You are logged out.");
-
             rmdir("./baileys_auth_info", { recursive: true }, () => {
               console.log("Successfully deleted directory!");
             });
           }
           startSock();
         }
-
         console.log("connection update", update);
       }
 
-      // credentials updated -- save them
+      // If credentials were updated, save them
       if (events["creds.update"]) {
         await saveCreds();
       }
 
       if (events.call) {
-        console.log("recv call event", events.call);
+        console.log("received call event", events.call);
       }
 
       // history received
@@ -135,7 +131,7 @@ const startSock = async () => {
         if (upsert.type === "notify") {
           for (const msg of upsert.messages) {
             if (msg.message.conversation === "ping") {
-              if (!msg.key.fromMe && doReplies) {
+              if (!msg.key.fromMe) {
                 console.log("replying to", msg.key.remoteJid);
                 await sock!.readMessages([msg.key]);
                 await sendMessageWTyping({ text: "pong" }, msg.key.remoteJid!);
@@ -143,15 +139,6 @@ const startSock = async () => {
             }
           }
         }
-      }
-
-      // messages updated like status delivered, message deleted etc.
-      if (events["messages.update"]) {
-        console.log(events["messages.update"]);
-      }
-
-      if (events["message-receipt.update"]) {
-        console.log(events["message-receipt.update"]);
       }
     }
   );
