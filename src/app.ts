@@ -11,6 +11,7 @@ import makeWASocket, {
   useMultiFileAuthState,
 } from "@adiwajshing/baileys";
 import MAIN_LOGGER from "@adiwajshing/baileys/lib/Utils/logger";
+import { rmdir } from "fs";
 
 const logger = MAIN_LOGGER.child({});
 logger.level = "trace";
@@ -91,15 +92,18 @@ const startSock = async () => {
         const update = events["connection.update"];
         const { connection, lastDisconnect } = update;
         if (connection === "close") {
-          // reconnect if not logged out
+          // delete auth credentials if logged out
           if (
-            (lastDisconnect?.error as Boom)?.output?.statusCode !==
+            (lastDisconnect?.error as Boom)?.output?.statusCode ==
             DisconnectReason.loggedOut
           ) {
-            startSock();
-          } else {
             console.log("Connection closed. You are logged out.");
+
+            rmdir("./baileys_auth_info", { recursive: true }, () => {
+              console.log("Successfully deleted directory!");
+            });
           }
+          startSock();
         }
 
         console.log("connection update", update);
@@ -119,7 +123,7 @@ const startSock = async () => {
         const { chats, contacts, messages, isLatest } =
           events["messaging-history.set"];
         console.log(
-          `recv ${chats.length} chats, ${contacts.length} contacts, ${messages.length} msgs (is latest: ${isLatest})`
+          `received ${chats.length} chats, ${contacts.length} contacts, ${messages.length} msgs (is latest: ${isLatest})`
         );
       }
 
@@ -134,7 +138,7 @@ const startSock = async () => {
               console.log("replying to", msg.key.remoteJid);
               await sock!.readMessages([msg.key]);
               await sendMessageWTyping(
-                { text: "Hello there!" },
+                { text: "pong" + msg.message },
                 msg.key.remoteJid!
               );
             }
@@ -149,36 +153,6 @@ const startSock = async () => {
 
       if (events["message-receipt.update"]) {
         console.log(events["message-receipt.update"]);
-      }
-
-      if (events["messages.reaction"]) {
-        console.log(events["messages.reaction"]);
-      }
-
-      if (events["presence.update"]) {
-        console.log(events["presence.update"]);
-      }
-
-      if (events["chats.update"]) {
-        console.log(events["chats.update"]);
-      }
-
-      if (events["contacts.update"]) {
-        for (const contact of events["contacts.update"]) {
-          if (typeof contact.imgUrl !== "undefined") {
-            const newUrl =
-              contact.imgUrl === null
-                ? null
-                : await sock!.profilePictureUrl(contact.id!).catch(() => null);
-            console.log(
-              `contact ${contact.id} has a new profile pic: ${newUrl}`
-            );
-          }
-        }
-      }
-
-      if (events["chats.delete"]) {
-        console.log("chats deleted ", events["chats.delete"]);
       }
     }
   );
