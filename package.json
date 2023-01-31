@@ -5,7 +5,8 @@
   "main": "dist/index.js",
   "scripts": {
     "start": "node dist/app.js",
-    "dev": "npx tsc -p tsconfig.json && npm start"
+    "build": "npx tsc -p tsconfig.json",
+    "dev": "npm run build && npm start"
   },
   "keywords": [],
   "author": "",
