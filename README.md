@@ -14,11 +14,9 @@
 
 ## QuickStart with Docker (Recommended)
 
-TODO
-
-<!-- ```sh
+```sh
 docker run paguiar735/baileys-quickstart
-``` -->
+```
 
 ## Manual QuickStart
 
