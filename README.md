@@ -25,7 +25,7 @@ docker run paguiar735/baileys-quickstart
 1. Clone the repository and cd into it:
 
 ```
-git clone https://github.com/Paguiar735/baileys-quickstart
+git clone https://github.com/codespearhead/baileys-quickstart
 cd baileys-quickstart
 ```
 
