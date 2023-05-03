@@ -1,4 +1,4 @@
-<h1 align="center"><a href="https://paguiar.link/baileys-quickstart">Baileys® Quickstart</a></h1>
+<h1 align="center"><a href="https://github.com/codespearhead/baileys-quickstart">Baileys® Quickstart</a></h1>
 
 <p align="center">
     <br>
