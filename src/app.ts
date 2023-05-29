@@ -130,11 +130,13 @@ const startSock = async () => {
 
         if (upsert.type === "notify") {
           for (const msg of upsert.messages) {
-            if (msg.message.conversation === "ping") {
-              if (!msg.key.fromMe) {
-                console.log("replying to", msg.key.remoteJid);
-                await sock!.readMessages([msg.key]);
-                await sendMessageWTyping({ text: "pong" }, msg.key.remoteJid!);
+            if (msg.message?.conversation) {
+              if (msg.message.conversation === "ping") {
+                if (!msg.key.fromMe) {
+                  console.log("replying to", msg.key.remoteJid);
+                  await sock!.readMessages([msg.key]);
+                  await sendMessageWTyping({ text: "pong" }, msg.key.remoteJid!);
+                }
               }
             }
           }
