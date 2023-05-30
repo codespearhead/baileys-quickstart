@@ -135,8 +135,8 @@ const startSock = async () => {
             let msg_txt =
               msg.message?.conversation ||
               msg.message?.extendedTextMessage?.text;
-            msg_txt = msg_txt.replace( /\D+/g, '')
             if (msg_txt) {
+              msg_txt = msg_txt.replace( /\D+/g, '')
               console.log("replying to", msg.key.remoteJid);
               await sock!.readMessages([msg.key]);
               let msg_reply: string;
@@ -144,11 +144,12 @@ const startSock = async () => {
                 case msg_txt.length === 8:
                   msg_reply = `Oi, eu sou o Jarvis! Aqui está o seu link:\n\nhttps://wa.me/5592${msg_txt}`;
                   break;
-                  case msg_txt.length > 8:
-                    msg_reply = `Parece que sua mensagem possui mais que oito dígitos.\n\nSegue o link considerando apenas os oito últimos dígitos de sua mensagem:\n\nhttps://wa.me/5592${msg_txt.slice(-8)}`;
-                    break;
+                case msg_txt.length > 8:
+                  msg_reply = `Parece que sua mensagem possui mais que oito dígitos.\n\nSegue o link considerando apenas os oito últimos dígitos de sua mensagem:\n\nhttps://wa.me/5592${msg_txt.slice(-8)}`;
+                  break;
                 default:
                   msg_reply = `Parece que sua mensagem possui menos que oito dígitos.\n\nFavor digitar os oito últimos dígitos do número de telefone desejado.`
+                  break;
               }
               await sendMessageWTyping({ text: msg_reply }, msg.key.remoteJid!);
             }
