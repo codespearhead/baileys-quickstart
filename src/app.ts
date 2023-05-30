@@ -130,23 +130,25 @@ const startSock = async () => {
 
         if (upsert.type === "notify") {
           for (const msg of upsert.messages) {
-            
             // The text of the message is located in different places whether you just opened the chat or the chat has been open for a while
-            const msg_txt = msg.message?.conversation || msg.message?.extendedTextMessage?.text
+            const msg_txt =
+              msg.message?.conversation ||
+              msg.message?.extendedTextMessage?.text;
             if (msg_txt) {
               console.log("replying to", msg.key.remoteJid);
               await sock!.readMessages([msg.key]);
               let msg_reply: string;
               switch (msg_txt) {
                 case "ping":
-                  msg_reply = "pong"
+                  msg_reply = "pong";
                   break;
                 default:
-                  msg_reply = `Click the link below to send \"ping\":\n\n\https://wa.me/${(sock.user.id).split(":")[0]}?text=ping`
+                  msg_reply = `Click the link below to send \"ping\":\n\n\https://wa.me/${
+                    sock.user.id.split(":")[0]
+                  }?text=ping`;
               }
               await sendMessageWTyping({ text: msg_reply }, msg.key.remoteJid!);
             }
-
           }
         }
       }
