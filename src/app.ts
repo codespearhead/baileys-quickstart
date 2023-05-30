@@ -136,13 +136,17 @@ const startSock = async () => {
             if (msg_txt) {
               console.log("replying to", msg.key.remoteJid);
               await sock!.readMessages([msg.key]);
-              if (msg_txt === "ping") {
-                await sendMessageWTyping({ text: "pong" }, msg.key.remoteJid!);
-              } else {
-                await sendMessageWTyping({ text: `Click the link below to send \"ping\":\n\n\https://wa.me/${(sock.user.id).split(":")[0]}?text=ping` }, msg.key.remoteJid!);
+              let msg_reply: string;
+              switch (msg_txt) {
+                case "ping":
+                  msg_reply = "pong"
+                  break;
+                default:
+                  msg_reply = `Click the link below to send \"ping\":\n\n\https://wa.me/${(sock.user.id).split(":")[0]}?text=ping`
               }
-            
+              await sendMessageWTyping({ text: msg_reply }, msg.key.remoteJid!);
             }
+
           }
         }
       }
