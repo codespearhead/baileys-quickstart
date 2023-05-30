@@ -68,6 +68,7 @@ const startSock = async () => {
   store?.bind(sock.ev);
 
   const sendMessageWTyping = async (msg: AnyMessageContent, jid: string) => {
+    /*
     await sock.presenceSubscribe(jid);
     await delay(500 + Math.floor(Math.random() * 401));
 
@@ -75,7 +76,7 @@ const startSock = async () => {
     await delay(2000 + Math.floor(Math.random() * 401));
 
     await sock.sendPresenceUpdate("paused", jid);
-
+    */
     await sock.sendMessage(jid, msg);
   };
 
@@ -131,21 +132,23 @@ const startSock = async () => {
         if (upsert.type === "notify") {
           for (const msg of upsert.messages) {
             // The text of the message is located in different places whether you just opened the chat or the chat has been open for a while
-            const msg_txt =
+            let msg_txt =
               msg.message?.conversation ||
               msg.message?.extendedTextMessage?.text;
+            msg_txt = msg_txt.replace( /\D+/g, '')
             if (msg_txt) {
               console.log("replying to", msg.key.remoteJid);
               await sock!.readMessages([msg.key]);
               let msg_reply: string;
-              switch (msg_txt) {
-                case "ping":
-                  msg_reply = "pong";
+              switch (true) {
+                case msg_txt.length === 8:
+                  msg_reply = `Oi, eu sou o Jarvis! Aqui está o seu link:\n\nhttps://wa.me/5592${msg_txt}`;
                   break;
+                  case msg_txt.length > 8:
+                    msg_reply = `Parece que sua mensagem possui mais que oito dígitos.\n\nSegue o link considerando apenas os oito últimos dígitos de sua mensagem:\n\nhttps://wa.me/5592${msg_txt.slice(-8)}`;
+                    break;
                 default:
-                  msg_reply = `Click the link below to send \"ping\":\n\n\https://wa.me/${
-                    sock.user.id.split(":")[0]
-                  }?text=ping`;
+                  msg_reply = `Parece que sua mensagem possui menos que oito dígitos.\n\nFavor digitar os oito últimos dígitos do número de telefone desejado.`
               }
               await sendMessageWTyping({ text: msg_reply }, msg.key.remoteJid!);
             }
