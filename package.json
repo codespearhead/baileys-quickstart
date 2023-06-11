@@ -12,7 +12,7 @@
   "author": "",
   "license": "GPLv3",
   "dependencies": {
-    "@adiwajshing/baileys": "^5.0.0",
+    "@whiskeysockets/baileys": "^5.0.0",
     "@adiwajshing/keyed-db": "^0.2.4",
     "@types/ws": "^8.5.4",
     "qrcode-terminal": "^0.12.0",
