@@ -1,6 +1,6 @@
 {
   "name": "baileys-quickstart",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "",
   "main": "dist/index.js",
   "scripts": {
@@ -12,10 +12,10 @@
   "author": "",
   "license": "GPLv3",
   "dependencies": {
-    "@whiskeysockets/baileys": "^5.0.0",
-    "@adiwajshing/keyed-db": "^0.2.4",
-    "@types/ws": "^8.5.4",
-    "qrcode-terminal": "^0.12.0",
-    "typescript": "^4.9.4"
+    "@whiskeysockets/baileys": "6.2.1",
+    "@adiwajshing/keyed-db": "0.2.4",
+    "@types/ws": "8.5.4",
+    "qrcode-terminal": "0.12.0",
+    "typescript": "4.9.4"
   }
 }
