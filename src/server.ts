@@ -1,8 +1,7 @@
+import ServiceLayer from "./service_layer";
 import { Boom } from "@hapi/boom";
 import NodeCache from "node-cache";
 import makeWASocket, {
-  AnyMessageContent,
-  delay,
   DisconnectReason,
   fetchLatestBaileysVersion,
   makeCacheableSignalKeyStore,
@@ -15,7 +14,7 @@ import makeWASocket, {
 import MAIN_LOGGER from "@whiskeysockets/baileys/lib/Utils/logger";
 
 const logger = MAIN_LOGGER.child({});
-logger.level = "trace";
+logger.level = "info";
 
 // external map to store retry counts of messages when decryption/encryption fails
 // keep this out of the socket itself, so as to prevent a message decryption/encryption loop across socket restarts
@@ -56,18 +55,6 @@ const startSock = async () => {
   });
 
   store?.bind(sock.ev);
-
-  const sendMessageWTyping = async (msg: AnyMessageContent, jid: string) => {
-    await sock.presenceSubscribe(jid);
-    await delay(500);
-
-    await sock.sendPresenceUpdate("composing", jid);
-    await delay(2000);
-
-    await sock.sendPresenceUpdate("paused", jid);
-
-    await sock.sendMessage(jid, msg);
-  };
 
   // the process function lets you process all events that just occurred
   // efficiently in a batch
@@ -115,44 +102,27 @@ const startSock = async () => {
 
         if (upsert.type === "notify") {
           for (const msg of upsert.messages) {
-            // The text of the message is located in different places whether you just opened the chat or the chat has been open for a while
-            const msg_txt =
-              msg.message?.conversation ||
-              msg.message?.extendedTextMessage?.text;
-            if (msg_txt) {
-              console.log("replying to", msg.key.remoteJid);
-              await sock!.readMessages([msg.key]);
-              let msg_reply: string;
-              switch (msg_txt) {
-                case "ping":
-                  msg_reply = "pong";
-                  break;
-                default:
-                  msg_reply = `Click the link below to send \"ping\":\n\n\https://wa.me/${
-                    sock.user.id.split(":")[0]
-                  }?text=ping`;
-              }
-              await sendMessageWTyping({ text: msg_reply }, msg.key.remoteJid!);
-            }
+            ServiceLayer.readMessage(sock, msg)
           }
         }
       }
+  
     }
   );
 
   return sock;
-
-  async function getMessage(
-    key: WAMessageKey
-  ): Promise<WAMessageContent | undefined> {
-    if (store) {
-      const msg = await store.loadMessage(key.remoteJid!, key.id!);
-      return msg?.message || undefined;
-    }
-
-    // only if store is present
-    return proto.Message.fromObject({});
-  }
 };
+
+async function getMessage(
+  key: WAMessageKey
+): Promise<WAMessageContent | undefined> {
+  if (store) {
+    const msg = await store.loadMessage(key.remoteJid!, key.id!);
+    return msg?.message || undefined;
+  }
+
+  // only if store is present
+  return proto.Message.fromObject({});
+}
 
 startSock();

@@ -2,9 +2,9 @@
   "name": "baileys-quickstart",
   "version": "1.0.3",
   "description": "",
-  "main": "dist/index.js",
+  "main": "src/server.js",
   "scripts": {
-    "start": "node dist/app.js",
+    "start": "node src/server.js",
     "build": "npx tsc -p tsconfig.json",
     "dev": "npm run build && npm start"
   },
@@ -13,10 +13,8 @@
   "license": "GPLv3",
   "dependencies": {
     "@adiwajshing/keyed-db": "0.2.4",
-    "@types/ws": "8.5.4",
     "@whiskeysockets/baileys": "6.2.1",
     "link-preview-js": "3.0.4",
-    "qrcode-terminal": "0.12.0",
-    "typescript": "4.9.4"
+    "qrcode-terminal": "0.12.0"
   }
 }
