@@ -1,31 +1,29 @@
 import { Boom } from "@hapi/boom";
+import NodeCache from "node-cache";
 import makeWASocket, {
   AnyMessageContent,
   delay,
   DisconnectReason,
   fetchLatestBaileysVersion,
-  isJidBroadcast,
   makeCacheableSignalKeyStore,
   makeInMemoryStore,
-  MessageRetryMap,
+  proto,
   useMultiFileAuthState,
-} from "@adiwajshing/baileys";
-import MAIN_LOGGER from "@adiwajshing/baileys/lib/Utils/logger";
-import { rmdir } from "fs";
+  WAMessageContent,
+  WAMessageKey,
+} from "@whiskeysockets/baileys";
+import MAIN_LOGGER from "@whiskeysockets/baileys/lib/Utils/logger";
 
-// Logger
 const logger = MAIN_LOGGER.child({});
-logger.level = "info";
+logger.level = "trace";
 
 // external map to store retry counts of messages when decryption/encryption fails
 // keep this out of the socket itself, so as to prevent a message decryption/encryption loop across socket restarts
-const msgRetryCounterMap: MessageRetryMap = {};
+const msgRetryCounterCache = new NodeCache();
 
 // the store maintains the data of the WA connection in memory
 // can be written out to a file & read from it
-const useStore = !process.argv.includes("--no-store");
-
-const store = useStore ? makeInMemoryStore({ logger }) : undefined;
+const store = makeInMemoryStore({ logger })
 store?.readFromFile("./baileys_store_multi.json");
 // save every 10s
 setInterval(() => {
@@ -45,34 +43,26 @@ const startSock = async () => {
     printQRInTerminal: true,
     auth: {
       creds: state.creds,
-      /** caching makes the store faster to send/recv messages */
+      /** caching makes the store faster to send/receive messages */
       keys: makeCacheableSignalKeyStore(state.keys, logger),
     },
-    msgRetryCounterMap,
+    msgRetryCounterCache,
     generateHighQualityLinkPreview: true,
-    // ignore all broadcast messages. TO receive them, comment out the line below
-    shouldIgnoreJid: (jid) => isJidBroadcast(jid),
-    // implement to handle retries
-    getMessage: async (key) => {
-      if (store) {
-        const msg = await store.loadMessage(key.remoteJid!, key.id!);
-        return msg?.message || undefined;
-      }
-      // only if store is present
-      return {
-        conversation: "hello",
-      };
-    },
+    // ignore all broadcast messages -- to receive the same
+    // comment the line below out
+    // shouldIgnoreJid: jid => isJidBroadcast(jid),
+    // implement to handle retries & poll updates
+    getMessage,
   });
 
   store?.bind(sock.ev);
 
   const sendMessageWTyping = async (msg: AnyMessageContent, jid: string) => {
     await sock.presenceSubscribe(jid);
-    await delay(500 + Math.floor(Math.random() * 401));
+    await delay(500);
 
     await sock.sendPresenceUpdate("composing", jid);
-    await delay(2000 + Math.floor(Math.random() * 401));
+    await delay(2000);
 
     await sock.sendPresenceUpdate("paused", jid);
 
@@ -90,28 +80,23 @@ const startSock = async () => {
         const update = events["connection.update"];
         const { connection, lastDisconnect } = update;
         if (connection === "close") {
-          // delete auth credentials if logged out
+          // reconnect if not logged out
           if (
-            (lastDisconnect?.error as Boom)?.output?.statusCode ==
+            (lastDisconnect?.error as Boom)?.output?.statusCode !==
             DisconnectReason.loggedOut
           ) {
+            startSock();
+          } else {
             console.log("Connection closed. You are logged out.");
-            rmdir("./baileys_auth_info", { recursive: true }, () => {
-              console.log("Successfully deleted directory!");
-            });
           }
-          startSock();
         }
+
         console.log("connection update", update);
       }
 
-      // If credentials were updated, save them
+      // credentials updated -- save them
       if (events["creds.update"]) {
         await saveCreds();
-      }
-
-      if (events.call) {
-        console.log("received call event", events.call);
       }
 
       // history received
@@ -119,7 +104,7 @@ const startSock = async () => {
         const { chats, contacts, messages, isLatest } =
           events["messaging-history.set"];
         console.log(
-          `received ${chats.length} chats, ${contacts.length} contacts, ${messages.length} msgs (is latest: ${isLatest})`
+          `recv ${chats.length} chats, ${contacts.length} contacts, ${messages.length} msgs (is latest: ${isLatest})`
         );
       }
 
@@ -156,6 +141,18 @@ const startSock = async () => {
   );
 
   return sock;
+
+  async function getMessage(
+    key: WAMessageKey
+  ): Promise<WAMessageContent | undefined> {
+    if (store) {
+      const msg = await store.loadMessage(key.remoteJid!, key.id!);
+      return msg?.message || undefined;
+    }
+
+    // only if store is present
+    return proto.Message.fromObject({});
+  }
 };
 
 startSock();
