@@ -102,9 +102,11 @@ const startSock = async () => {
         if (upsert.type === "notify") {
           for (const msg of upsert.messages) {
             try {
-              const { default: ServiceLayer } = await import("./ServiceLayer.js");
+              const { default: ServiceLayer } = await import(
+                "./ServiceLayer.js"
+              );
               ServiceLayer.readMessage(sock, msg);
-              delete require.cache[require.resolve("./ServiceLayer.js")]
+              delete require.cache[require.resolve("./ServiceLayer.js")];
             } catch (e) {
               console.log(e);
             }
