@@ -20,7 +20,7 @@ docker run paguiar735/baileys-quickstart
 
 ## Manual QuickStart
 
-> **Note**: You'll need the latest LTS version of Node or later installed on your system.
+> **Note**: You'll need the latest LTS version of Node installed on your system.
 
 1. Clone the repository and cd into it:
 
@@ -35,11 +35,21 @@ cd baileys-quickstart
 npm i
 ```
 
-3.  Transpile and run the minimal working example:
+3. Transpile the Server.ts:
 
 ```
-npm run dev
+npm run build
 ```
+
+4. Run the minimal working example:
+
+```
+npm start
+```
+
+Note that method readMessage from ServiceLayer.js will be called upon receiving a message. Implement function realBusinessLogic in that file to override the default replies, as shown in branch "whatsapp-click-to-chat".
+
+
 
 ## Usage
 
@@ -51,17 +61,16 @@ After scanning the QRCode, send "ping" (without quotes) to the WhatsApp account 
   <br><br>
 </p>
 
-Conversely, you can replace the contents of src/app.ts with what's provided in the [official MRE](https://github.com/adiwajshing/Baileys/blob/master/Example/example.ts) so long as you point the import paths to the node_modules folder.
 
 ## Disclaimers
 
 > **Warning**: WhatsApp's averse to any type of automation that it considers to be "Harm[ful] to WhatsApp or [their] Users" on its platform, unless it's coming from an official WhatsApp Businesses API partner. So, it’s advisable to read WhatsApp's [Terms of Service](https://www.whatsapp.com/legal/terms-of-service) in order not to break them. Use this software at your own risk.
 
-> **Note**: This repository was built upon the currently official [quickstart](https://github.com/adiwajshing/Baileys/blob/master/Example/example.ts) of Baileys®, which as of today doesn't qualify as a [MRE](https://en.wikipedia.org/wiki/Minimal_reproducible_example).
+> **Note**: This repository was built upon the currently official [quickstart](https://github.com/WhiskeySockets/Baileys/blob/master/Example/example.ts) of Baileys®, which as of today doesn't qualify as a [MRE](https://en.wikipedia.org/wiki/Minimal_reproducible_example).
 
 > **Note**: We are not affiliated, associated, authorized, endorsed by or in any way officially connected to WhatsApp, LLC. ([www.whatsapp.com](https://www.whatsapp.com)).
 
-> **Note**: We are not affiliated, associated, authorized, endorsed by or in any way officially connected to Baileys®. ([https://github.com/adiwajshing/Baileys](https://github.com/adiwajshing/Baileys)).
+> **Note**: We are not affiliated, associated, authorized, endorsed by or in any way officially connected to Baileys®. ([https://github.com/WhiskeySockets/Baileyss](https://github.com/WhiskeySockets/Baileys)).
 
 > **Note**:
 > Copyright Disclaimer under section 107 of the Copyright Act 1976, allowance is made for “fair use” for purposes such as criticism, comment, news reporting, teaching, scholarship, education and research.
