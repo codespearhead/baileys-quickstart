@@ -48,8 +48,7 @@ module.exports = class ServiceLayer {
     }
   }
 
-  // Uncomment the lines below to implement your business logic.
-  // See examples in branch "whatsapp-click-to-chat"
+  // Uncomment the lines below to implement your business logic
   // static async realBusinessLogic(sock, msg_txt, msg_destinatary) {
   // }
 

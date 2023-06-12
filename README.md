@@ -35,19 +35,19 @@ cd baileys-quickstart
 npm i
 ```
 
-3.  (Optional) Transpile the server.ts:
+3. Transpile the Server.ts:
 
 ```
-npm run dev
+npm run build
 ```
 
-4. run the minimal working example:
+4. Run the minimal working example:
 
 ```
 npm start
 ```
 
-Note that method readMessage from service_layer.js will be called upon receiving a message.
+Note that method readMessage from ServiceLayer.js will be called upon receiving a message. Implement function realBusinessLogic in that file to override the default replies, as shown in branch "whatsapp-click-to-chat".
 
 
 
