@@ -1,3 +1,6 @@
+# Project-specific
+src/Server.js
+
 # Baileys-specific
 auth_info*.json
 baileys_auth_info*

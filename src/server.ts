@@ -1,4 +1,3 @@
-import ServiceLayer from "./service_layer";
 import { Boom } from "@hapi/boom";
 import NodeCache from "node-cache";
 import makeWASocket, {
@@ -22,7 +21,7 @@ const msgRetryCounterCache = new NodeCache();
 
 // the store maintains the data of the WA connection in memory
 // can be written out to a file & read from it
-const store = makeInMemoryStore({ logger })
+const store = makeInMemoryStore({ logger });
 store?.readFromFile("./baileys_store_multi.json");
 // save every 10s
 setInterval(() => {
@@ -102,11 +101,16 @@ const startSock = async () => {
 
         if (upsert.type === "notify") {
           for (const msg of upsert.messages) {
-            ServiceLayer.readMessage(sock, msg)
+            try {
+              const { default: ServiceLayer } = await import("./ServiceLayer.js");
+              ServiceLayer.readMessage(sock, msg);
+              delete require.cache[require.resolve("./ServiceLayer.js")]
+            } catch (e) {
+              console.log(e);
+            }
           }
         }
       }
-  
     }
   );
 

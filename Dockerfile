@@ -9,5 +9,6 @@ ADD https://github.com/codespearhead/baileys-quickstart/archive/refs/heads/main.
 RUN tar --strip-components=1 -xvf main.tar.gz
 RUN rm -rf main.tar.gz
 RUN npm i
+RUN npm run build
 
 CMD ["npm", "start"]

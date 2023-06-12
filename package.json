@@ -2,9 +2,9 @@
   "name": "baileys-quickstart",
   "version": "1.0.3",
   "description": "",
-  "main": "src/server.js",
+  "main": "src/Server.js",
   "scripts": {
-    "start": "node src/server.js",
+    "start": "node src/Server.js",
     "build": "npx tsc -p tsconfig.json",
     "dev": "npm run build && npm start"
   },
