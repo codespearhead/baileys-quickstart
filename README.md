@@ -29,7 +29,7 @@ git clone https://github.com/codespearhead/baileys-quickstart
 cd baileys-quickstart
 ```
 
-2.  Download the dependencies used in the minimal working example
+2.  Download the dependencies used in the minimal reproducible example
 
 ```
 npm i
@@ -70,7 +70,7 @@ After scanning the QRCode, send "ping" (without quotes) to the WhatsApp account 
 
 > **Note**: We are not affiliated, associated, authorized, endorsed by or in any way officially connected to WhatsApp, LLC. ([www.whatsapp.com](https://www.whatsapp.com)).
 
-> **Note**: We are not affiliated, associated, authorized, endorsed by or in any way officially connected to Baileys®. ([https://github.com/WhiskeySockets/Baileyss](https://github.com/WhiskeySockets/Baileys)).
+> **Note**: We are not affiliated, associated, authorized, endorsed by or in any way officially connected to Baileys®. ([https://github.com/WhiskeySockets/Baileys](https://github.com/WhiskeySockets/Baileys)).
 
 > **Note**:
 > Copyright Disclaimer under section 107 of the Copyright Act 1976, allowance is made for “fair use” for purposes such as criticism, comment, news reporting, teaching, scholarship, education and research.
