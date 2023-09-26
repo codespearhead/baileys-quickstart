@@ -52,12 +52,13 @@ module.exports = class ServiceLayer {
   static async realBusinessLogic(sock, msg_txt, msg_destinatary) {
     msg_txt = msg_txt.replace(/\D+/g, "");
     let msg_reply;
+    let base_url = `https://api.whatsapp.com/send?phone=5592`;
     switch (true) {
       case msg_txt.length === 8:
-        msg_reply = `Oi, eu sou o Jarvis! Aqui está o seu link:\n\nhttps://wa.me/5592${msg_txt}`;
+        msg_reply = `Oi, eu sou o Jarvis! Aqui está o seu link:\n\n${base_url}${msg_txt}`;
         break;
       case msg_txt.length > 8:
-        msg_reply = `Parece que sua mensagem possui mais que oito dígitos.\n\nSegue o link considerando apenas os oito últimos dígitos de sua mensagem:\n\nhttps://wa.me/5592${msg_txt.slice(
+        msg_reply = `Parece que sua mensagem possui mais que oito dígitos.\n\nSegue o link considerando apenas os oito últimos dígitos de sua mensagem:\n\n${base_url}${msg_txt.slice(
           -8
         )}`;
         break;
