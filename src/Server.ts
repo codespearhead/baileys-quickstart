@@ -69,66 +69,35 @@ const startSock = async () => {
     }
   })
 
-  // the process function lets you process all events that just occurred
-  // efficiently in a batch
-  sock.ev.process(
-    // events is a map for event name => event data
-    async (events) => {
-      // something about the connection changed
-      // maybe it closed, or we received all offline message or connection opened
-      if (events["connection.update"]) {
-        const update = events["connection.update"];
-        const { connection, lastDisconnect } = update;
-        if (connection === "close") {
-          // reconnect if not logged out
-          if (
-            (lastDisconnect?.error as Boom)?.output?.statusCode !==
-            DisconnectReason.loggedOut
-          ) {
-            startSock();
-          } else {
-            console.log("Connection closed. You are logged out.");
-          }
-        }
+  sock.ev.on("creds.update", async () => {
+    await saveCreds();
+  })
 
-        console.log("connection update", update);
-      }
+  // history received
+  sock.ev.on("messaging-history.set", async ({ chats, contacts, messages, isLatest }) => {
+    console.log(
+      `recv ${chats.length} chats, ${contacts.length} contacts, ${messages.length} msgs (is latest: ${isLatest})`
+    );
+  })
 
-      // credentials updated -- save them
-      if (events["creds.update"]) {
-        await saveCreds();
-      }
+  // received a new message
+  sock.ev.on("messages.upsert", async (upsert) => {
+    console.log("recv messages ", JSON.stringify(upsert, undefined, 2));
 
-      // history received
-      if (events["messaging-history.set"]) {
-        const { chats, contacts, messages, isLatest } =
-          events["messaging-history.set"];
-        console.log(
-          `recv ${chats.length} chats, ${contacts.length} contacts, ${messages.length} msgs (is latest: ${isLatest})`
-        );
-      }
-
-      // received a new message
-      if (events["messages.upsert"]) {
-        const upsert = events["messages.upsert"];
-        console.log("recv messages ", JSON.stringify(upsert, undefined, 2));
-
-        if (upsert.type === "notify") {
-          for (const msg of upsert.messages) {
-            try {
-              const { default: ServiceLayer } = await import(
-                "./ServiceLayer.js"
-              );
-              ServiceLayer.readMessage(sock, msg);
-              delete require.cache[require.resolve("./ServiceLayer.js")];
-            } catch (e) {
-              console.log(e);
-            }
-          }
+    if (upsert.type === "notify") {
+      for (const msg of upsert.messages) {
+        try {
+          const { default: ServiceLayer } = await import(
+            "./ServiceLayer.js"
+          );
+          ServiceLayer.readMessage(sock, msg);
+          delete require.cache[require.resolve("./ServiceLayer.js")];
+        } catch (e) {
+          console.log(e);
         }
       }
     }
-  );
+  })
 
   return sock;
 };
