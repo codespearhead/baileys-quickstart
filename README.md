@@ -15,7 +15,7 @@
 ## QuickStart with Docker (Recommended)
 
 ```sh
-docker run paguiar735/baileys-quickstart
+docker compose up
 ```
 
 ## Manual QuickStart
