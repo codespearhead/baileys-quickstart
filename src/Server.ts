@@ -1,5 +1,4 @@
 import { Boom } from "@hapi/boom";
-import NodeCache from "node-cache";
 import makeWASocket, {
   DisconnectReason,
   fetchLatestBaileysVersion,
@@ -11,6 +10,7 @@ import makeWASocket, {
   WAMessageKey,
 } from "@whiskeysockets/baileys";
 import MAIN_LOGGER from "@whiskeysockets/baileys/lib/Utils/logger";
+import NodeCache from "node-cache";
 
 const logger = MAIN_LOGGER.child({});
 logger.level = "info";
@@ -54,6 +54,20 @@ const startSock = async () => {
   });
 
   store?.bind(sock.ev);
+
+  sock.ev.on('connection.update', (update) => {
+    const { connection, lastDisconnect } = update
+    if (connection === 'close') {
+      const shouldReconnect = (lastDisconnect.error as Boom)?.output?.statusCode !== DisconnectReason.loggedOut
+      console.log('connection closed due to ', lastDisconnect.error, ', reconnecting ', shouldReconnect)
+      // reconnect if not logged out
+      if (shouldReconnect) {
+        startSock()
+      }
+    } else if (connection === 'open') {
+      console.log('opened connection')
+    }
+  })
 
   // the process function lets you process all events that just occurred
   // efficiently in a batch
